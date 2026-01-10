@@ -9,7 +9,7 @@
     "format": "prettier --write --log-level warn './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "lint": "eslint . --fix",
     "test": "echo \"Skipping tests ...\" && exit 0",
-    "db:reset:local": "pnpm dlx supabase db reset && pnpm db:gen:types",
+    "db:reset": "pnpm dlx supabase db reset && pnpm db:gen:types",
     "db:gen:types": "pnpm dlx supabase gen types typescript --local > src/lib/database.types.ts"
   },
   "dependencies": {
@@ -56,7 +56,7 @@
     "pre-push": "pnpm lint && pnpm build && pnpm test"
   },
   "lint-staged": {
-    "**/*.{js,mjs,ts,tsx}": [
+    "**/*.{js,mjs,ts,tsx,json,sql}": [
       "prettier --write",
       "eslint --fix"
     ]
