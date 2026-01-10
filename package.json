@@ -8,10 +8,14 @@
     "start": "next start",
     "format": "prettier --write --log-level warn './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "lint": "eslint . --fix",
-    "test": "echo \"Skipping tests ...\" && exit 0"
+    "test": "echo \"Skipping tests ...\" && exit 0",
+    "db:reset:local": "pnpm dlx supabase db reset && pnpm db:gen:types",
+    "db:gen:types": "pnpm dlx supabase gen types typescript --local > src/lib/database.types.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.90.1",
     "@tanstack/react-query": "^5.90.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
