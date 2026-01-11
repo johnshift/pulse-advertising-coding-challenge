@@ -38,6 +38,7 @@ export const LoginForm = ({
         password,
       });
       if (error) throw error;
+      router.refresh();
       router.push('/dashboard');
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred');
