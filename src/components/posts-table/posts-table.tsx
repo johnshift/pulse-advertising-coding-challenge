@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { usePosts } from '@/hooks/use-posts';
 import { useDashboardStore } from '@/lib/stores/dashboard.store';
+import { cn } from '@/lib/utils';
 
 import { createColumns } from './posts-table-columns';
 import { PostDetailDialog } from './post-detail-dialog';
@@ -27,23 +27,23 @@ import {
   PostsTableLoading,
 } from './posts-table-states';
 import { PostsTableToolbar } from './posts-table-toolbar';
-import { Post } from '../../lib/types';
-import { cn } from '@/lib/utils';
 
 export const PostsTable = () => {
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const {
     page,
     pageSize,
     sortField,
     sortDirection,
     platform,
+    selectedPost,
+    isPostDialogOpen,
     setPage,
     setPageSize,
     setSorting,
     setPlatform,
     resetFilters,
+    openPostDialog,
+    closePostDialog,
   } = useDashboardStore();
 
   const {
@@ -137,16 +137,12 @@ export const PostsTable = () => {
               {table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => {
-                    setSelectedPost(row.original);
-                    setDialogOpen(true);
-                  }}
+                  onClick={() => openPostDialog(row.original)}
                   className='h-[53px] cursor-pointer'
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      setSelectedPost(row.original);
-                      setDialogOpen(true);
+                      openPostDialog(row.original);
                     }
                   }}
                 >
@@ -180,8 +176,8 @@ export const PostsTable = () => {
 
       <PostDetailDialog
         post={selectedPost}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={isPostDialogOpen}
+        onOpenChange={(open) => !open && closePostDialog()}
       />
     </div>
   );

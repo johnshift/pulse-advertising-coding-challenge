@@ -2,7 +2,9 @@
 
 import { ReactNode } from 'react';
 
+import { PostDetailDialog } from '@/components/posts-table/post-detail-dialog';
 import { useAnalyticsSummary } from '@/hooks/use-analytics-summary';
+import { useDashboardStore } from '@/lib/stores/dashboard.store';
 
 import { AvgEngagementCard } from './avg-engagement-card';
 import {
@@ -28,6 +30,8 @@ const SummaryCardsWrapper = ({ children }: { children: ReactNode }) => (
 
 export const SummaryCards = () => {
   const { data, isLoading, isError, refetch } = useAnalyticsSummary();
+  const { selectedPost, isPostDialogOpen, openPostDialog, closePostDialog } =
+    useDashboardStore();
 
   if (isLoading) {
     return (
@@ -67,11 +71,19 @@ export const SummaryCards = () => {
           trend={summary.trend}
         />
         {summary.topPost ? (
-          <TopPostCard post={summary.topPost} />
+          <TopPostCard
+            post={summary.topPost}
+            onClick={() => openPostDialog(summary.topPost!)}
+          />
         ) : (
           <TopPostCardEmpty />
         )}
       </div>
+      <PostDetailDialog
+        post={selectedPost}
+        open={isPostDialogOpen}
+        onOpenChange={(open) => !open && closePostDialog()}
+      />
     </SummaryCardsWrapper>
   );
 };
