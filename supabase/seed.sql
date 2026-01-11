@@ -25,6 +25,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_permalink(p_platform TEXT)
+RETURNS TEXT AS $$
+BEGIN
+  IF p_platform = 'instagram' THEN
+    RETURN 'https://instagram.com/p/BgSlRglAKBn';
+  ELSE
+    RETURN 'https://tiktok.com/@dragonstarszn/video/6933389141577108741';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION random_lorem(quantity_ INT)
 RETURNS TEXT AS $$
 DECLARE
@@ -69,11 +80,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION random_image_url()
+RETURNS TEXT AS $$
+BEGIN
+  RETURN format('https://picsum.photos/seed/%s/400/400.webp', floor(random() * 2000 + 1)::INT);
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION random_thumbnail(
   p_media_type TEXT,
   p_carousel_min INT,
-  p_carousel_max INT,
-  p_seed_max INT
+  p_carousel_max INT
 )
 RETURNS TEXT AS $$
 DECLARE
@@ -82,14 +99,14 @@ DECLARE
   i INT;
 BEGIN
   IF p_media_type IN ('image', 'video') THEN
-    RETURN format('https://picsum.photos/seed/img%s/800/800', floor(random() * p_seed_max + 1)::INT);
+    RETURN random_image_url();
   ELSE
     num_images := floor(random() * (p_carousel_max - p_carousel_min + 1) + p_carousel_min)::INT;
     FOR i IN 1..num_images LOOP
       IF result = '' THEN
-        result := format('https://picsum.photos/seed/img%s/800/800', floor(random() * p_seed_max + 1)::INT);
+        result := random_image_url();
       ELSE
-        result := result || ',' || format('https://picsum.photos/seed/img%s/800/800', floor(random() * p_seed_max + 1)::INT);
+        result := result || ',' || random_image_url();
       END IF;
     END LOOP;
     RETURN result;
@@ -110,9 +127,6 @@ DECLARE
   -- Caption word count range (varying lengths)
   c_caption_words_min CONSTANT INT := 3;
   c_caption_words_max CONSTANT INT := 12;
-
-  -- Thumbnail image seed max (for picsum.photos/seed/img{N}/800/800)
-  c_image_seed_max CONSTANT INT := 8;
 
   -- Carousel image count range
   c_carousel_min CONSTANT INT := 2;
@@ -223,14 +237,15 @@ BEGIN
       saves,
       reach,
       impressions,
-      engagement_rate
+      engagement_rate,
+      permalink
     )
     SELECT
       current_id,
-      random_platform(),
+      platform,
       random_lorem(random_between(c_caption_words_min, c_caption_words_max)),
-      sub.media_type,
-      random_thumbnail(sub.media_type, c_carousel_min, c_carousel_max, c_image_seed_max),
+      media_type,
+      random_thumbnail(media_type, c_carousel_min, c_carousel_max),
       (current_date - (day_offset || ' days')::INTERVAL) + (post_num || ' hours')::INTERVAL,
       random_between(c_likes_min, c_likes_max),
       random_between(c_comments_min, c_comments_max),
@@ -238,11 +253,18 @@ BEGIN
       random_between(c_saves_min, c_saves_max),
       random_between(c_reach_min, c_reach_max),
       random_between(c_reach_min, c_reach_max) * (1.2 + random() * 0.6)::INT,
-      0
-    FROM
-      generate_series(0, c_num_days - 1) AS day_offset,
-      generate_series(1, random_between(c_posts_per_day_min, c_posts_per_day_max)) AS post_num,
-      LATERAL (SELECT random_media_type() AS media_type) AS sub;
+      0,
+      get_permalink(platform)
+    FROM (
+      SELECT
+        day_offset,
+        post_num,
+        random_platform() AS platform,
+        random_media_type() AS media_type
+      FROM
+        generate_series(0, c_num_days - 1) AS day_offset,
+        generate_series(1, random_between(c_posts_per_day_min, c_posts_per_day_max)) AS post_num
+    ) AS sub;
 
     -- Update engagement_rate based on actual values
     UPDATE posts
@@ -270,4 +292,6 @@ DROP FUNCTION IF EXISTS random_between(INT, INT);
 DROP FUNCTION IF EXISTS random_platform();
 DROP FUNCTION IF EXISTS random_media_type();
 DROP FUNCTION IF EXISTS random_lorem(INT);
-DROP FUNCTION IF EXISTS random_thumbnail(TEXT, INT, INT, INT);
+DROP FUNCTION IF EXISTS random_thumbnail(TEXT, INT, INT);
+DROP FUNCTION IF EXISTS random_image_url();
+DROP FUNCTION IF EXISTS get_permalink(TEXT);
