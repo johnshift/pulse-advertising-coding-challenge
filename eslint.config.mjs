@@ -20,7 +20,13 @@ const eslintConfig = defineConfig([
       'func-style': ['error', 'expression'],
     },
   },
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    '**/*.json',
+  ]),
 ]);
 
 export default eslintConfig;
