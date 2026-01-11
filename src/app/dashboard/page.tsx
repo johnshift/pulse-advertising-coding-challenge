@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { LogoutButton } from '@/components/auth/logout-button';
+import { DailyMetrics } from '@/components/daily-metrics';
 import { PostsTable } from '@/components/posts-table';
 import { createClient } from '@/lib/supabase/server';
 
@@ -19,6 +20,10 @@ const DashboardPage = async () => {
           Hello <span>{data.claims.email}</span>
         </p>
         <LogoutButton />
+      </div>
+
+      <div className='max-w-6xl'>
+        <DailyMetrics />
       </div>
 
       <div className='max-w-6xl'>

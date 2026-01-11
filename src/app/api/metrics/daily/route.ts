@@ -1,9 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-export const GET = async () => {
+const RANGE_DAYS: Record<string, number | null> = {
+  week: 7,
+  month: 30,
+  quarter: 90,
+  year: 365,
+  all: null,
+};
+
+export const GET = async (request: NextRequest) => {
   const supabase = await createClient();
 
   // Auth Check
@@ -15,13 +23,22 @@ export const GET = async () => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Fetch last 30 days, ordered by date ascending for the chart
-  const { data, error } = await supabase
+  const range = request.nextUrl.searchParams.get('range') ?? 'month';
+  const days = range in RANGE_DAYS ? RANGE_DAYS[range] : RANGE_DAYS.month;
+
+  let query = supabase
     .from('daily_metrics')
     .select('date, engagement, reach')
-    .eq('user_id', user.id)
-    .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Last 30 days
-    .order('date', { ascending: true });
+    .eq('user_id', user.id);
+
+  if (days !== null) {
+    const fromDate = new Date(
+      Date.now() - days * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    query = query.gte('date', fromDate);
+  }
+
+  const { data, error } = await query.order('date', { ascending: true });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

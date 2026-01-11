@@ -120,7 +120,7 @@ DO $$
 DECLARE
   -- Configuration constants
   c_num_users CONSTANT INT := 2;
-  c_num_days CONSTANT INT := 60;
+  c_num_days CONSTANT INT := 1080;  
   c_posts_per_day_min CONSTANT INT := 3;
   c_posts_per_day_max CONSTANT INT := 5;
 
@@ -133,16 +133,16 @@ DECLARE
   c_carousel_max CONSTANT INT := 5;
 
   -- Engagement metric ranges
-  c_likes_min CONSTANT INT := 50;
-  c_likes_max CONSTANT INT := 2000;
-  c_comments_min CONSTANT INT := 5;
-  c_comments_max CONSTANT INT := 200;
-  c_shares_min CONSTANT INT := 2;
-  c_shares_max CONSTANT INT := 100;
-  c_saves_min CONSTANT INT := 5;
-  c_saves_max CONSTANT INT := 150;
-  c_reach_min CONSTANT INT := 500;
-  c_reach_max CONSTANT INT := 15000;
+  c_likes_min CONSTANT INT := 30;
+  c_likes_max CONSTANT INT := 1500;
+  c_comments_min CONSTANT INT := 0;
+  c_comments_max CONSTANT INT := 100;
+  c_shares_min CONSTANT INT := 0;
+  c_shares_max CONSTANT INT := 50;
+  c_saves_min CONSTANT INT := 0;
+  c_saves_max CONSTANT INT := 50;
+  c_reach_min CONSTANT INT := 50;
+  c_reach_max CONSTANT INT := 4000;
 
   -- Loop variables
   i INT;
@@ -240,19 +240,28 @@ BEGIN
       engagement_rate,
       permalink
     )
+    WITH day_factors AS (
+      SELECT
+        day_offset,
+        (0.5 + random() * 1.3) AS eng_factor,   -- 0.5 to 1.8 for engagement
+        (0.7 + random() * 0.8) AS reach_factor  -- 0.7 to 1.5 for reach (smoother)
+      FROM generate_series(0, c_num_days - 1) AS day_offset
+    )
     SELECT
       current_id,
       platform,
       random_lorem(random_between(c_caption_words_min, c_caption_words_max)),
       media_type,
       random_thumbnail(media_type, c_carousel_min, c_carousel_max),
-      (current_date - (day_offset || ' days')::INTERVAL) + (post_num || ' hours')::INTERVAL,
-      random_between(c_likes_min, c_likes_max),
-      random_between(c_comments_min, c_comments_max),
-      random_between(c_shares_min, c_shares_max),
-      random_between(c_saves_min, c_saves_max),
-      random_between(c_reach_min, c_reach_max),
-      random_between(c_reach_min, c_reach_max) * (1.2 + random() * 0.6)::INT,
+      (current_date - (posts.day_offset || ' days')::INTERVAL) + (post_num || ' hours')::INTERVAL,
+      -- Apply eng_factor to create "good days" and "bad days"
+      (likes * eng_factor)::INT,
+      (comments * eng_factor)::INT,
+      (shares * eng_factor)::INT,
+      (saves * eng_factor)::INT,
+      -- Reach uses smoother reach_factor + correlation with engagement
+      GREATEST(c_reach_min, LEAST(c_reach_max, (((likes + comments + shares + saves) * reach_factor) * (1.5 + random() * 3))::INT + random_between(0, c_reach_max / 4))),
+      GREATEST(c_reach_min, LEAST(c_reach_max, (((likes + comments + shares + saves) * reach_factor) * (1.5 + random() * 3))::INT + random_between(0, c_reach_max / 4))) * (1.2 + random() * 0.6)::INT,
       0,
       get_permalink(platform)
     FROM (
@@ -260,15 +269,20 @@ BEGIN
         day_offset,
         post_num,
         random_platform() AS platform,
-        random_media_type() AS media_type
+        random_media_type() AS media_type,
+        random_between(c_likes_min, c_likes_max) AS likes,
+        random_between(c_comments_min, c_comments_max) AS comments,
+        random_between(c_shares_min, c_shares_max) AS shares,
+        random_between(c_saves_min, c_saves_max) AS saves
       FROM
         generate_series(0, c_num_days - 1) AS day_offset,
         generate_series(1, random_between(c_posts_per_day_min, c_posts_per_day_max)) AS post_num
-    ) AS sub;
+    ) AS posts
+    JOIN day_factors USING (day_offset);
 
     -- Update engagement_rate based on actual values
     UPDATE posts
-    SET engagement_rate = ROUND(((likes + comments + shares + saves)::DECIMAL / NULLIF(reach, 0)) * 100, 2)
+    SET engagement_rate = LEAST(ROUND(((likes + comments + shares + saves)::DECIMAL / NULLIF(reach, 0)) * 100, 2), 999.99)
     WHERE user_id = current_id AND engagement_rate = 0;
 
     -- Calculate daily_metrics from posts
