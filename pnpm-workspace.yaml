@@ -7,6 +7,7 @@ ignoredBuiltDependencies:
 
 onlyBuiltDependencies:
   - core-js
+  - cypress
   - esbuild
   - simple-git-hooks
   - supabase
