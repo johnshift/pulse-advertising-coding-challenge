@@ -12,6 +12,8 @@ import {
 
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -114,6 +116,7 @@ export const DailyMetricsChart = ({
               />
             }
           />
+          <ChartLegend content={<ChartLegendContent />} />
           {visibleMetrics.map((metric) => (
             <Area
               key={metric}
@@ -155,6 +158,7 @@ export const DailyMetricsChart = ({
             />
           }
         />
+        <ChartLegend content={<ChartLegendContent />} />
         {visibleMetrics.map((metric) => (
           <Line
             key={metric}
