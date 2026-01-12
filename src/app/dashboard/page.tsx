@@ -1,19 +1,9 @@
-import { redirect } from 'next/navigation';
-
 import { DailyMetrics } from '@/components/daily-metrics';
 import { PostsTable } from '@/components/posts-table';
 import { SummaryCards } from '@/components/summary-cards';
-import { createClient } from '@/lib/supabase/server';
 import { AppHeader } from '@/components/app-header/app-header';
 
-const DashboardPage = async () => {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
-    redirect('/auth/login');
-  }
-
+const DashboardPage = () => {
   return (
     <div className='min-h-screen bg-background'>
       <AppHeader />
