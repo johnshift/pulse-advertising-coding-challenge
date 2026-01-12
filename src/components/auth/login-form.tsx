@@ -1,5 +1,10 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import * as motion from 'motion/react-client';
+
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,14 +17,13 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { fadeUpVariant } from '@/lib/motion';
 
-export const LoginForm = ({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<'div'>) => {
+type LoginFormProps = {
+  className?: string;
+};
+
+export const LoginForm = ({ className }: LoginFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +52,12 @@ export const LoginForm = ({
   };
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <motion.div
+      className={cn('flex flex-col gap-6', className)}
+      variants={fadeUpVariant}
+      initial='hidden'
+      animate='visible'
+    >
       <Card>
         <CardHeader>
           <CardTitle className='text-2xl'>Login</CardTitle>
@@ -105,6 +114,6 @@ export const LoginForm = ({
           </form>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 };
