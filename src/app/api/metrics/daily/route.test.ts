@@ -232,30 +232,24 @@ describe('GET /api/metrics/daily', () => {
     });
   });
 
-  it('defaults to month range when invalid range provided', async () => {
-    setupMockChain();
+  it('returns 400 when invalid range provided', async () => {
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'test-user-id' } },
       error: null,
     });
 
-    const now = Date.now();
-    vi.spyOn(Date, 'now').mockReturnValue(now);
-
     await testApiHandler({
       appHandler,
       url: '/api/metrics/daily?range=invalid',
       test: async ({ fetch }) => {
-        await fetch({ method: 'GET' });
+        const response = await fetch({ method: 'GET' });
+        const json = await response.json();
 
-        expect(mockGte).toHaveBeenCalledWith(
-          'date',
-          new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        );
+        expect(response.status).toBe(400);
+        expect(json.error).toBe('Invalid request parameters');
+        expect(json.details).toBeDefined();
       },
     });
-
-    vi.restoreAllMocks();
   });
 
   it('returns 500 on database error', async () => {
@@ -278,6 +272,30 @@ describe('GET /api/metrics/daily', () => {
 
         expect(response.status).toBe(500);
         expect(json.error).toBe('Database connection failed');
+      },
+    });
+  });
+
+  it('returns 500 on schema validation error', async () => {
+    setupMockChain();
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+    mockOrder.mockResolvedValue({
+      data: [{ invalid: 'data' }],
+      error: null,
+    });
+
+    await testApiHandler({
+      appHandler,
+      url: '/api/metrics/daily',
+      test: async ({ fetch }) => {
+        const response = await fetch({ method: 'GET' });
+        const json = await response.json();
+
+        expect(response.status).toBe(500);
+        expect(json.error).toBe('Data validation failed');
       },
     });
   });
