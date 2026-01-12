@@ -40,6 +40,40 @@ const mockSupabase = {
   }),
 };
 
+const createMockPost = (overrides: {
+  id?: string;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  engagement_rate?: number;
+}) => ({
+  id: overrides.id ?? 'post-1',
+  user_id: 'test-user-id',
+  platform: 'instagram',
+  media_type: 'image',
+  posted_at: '2026-01-01T00:00:00Z',
+  caption: null,
+  thumbnail_url: null,
+  permalink: null,
+  likes: overrides.likes ?? 0,
+  comments: overrides.comments ?? 0,
+  shares: overrides.shares ?? 0,
+  saves: null,
+  reach: null,
+  impressions: null,
+  engagement_rate: overrides.engagement_rate ?? 0,
+  created_at: null,
+});
+
+const createMockMetric = (overrides: { date: string; engagement: number }) => ({
+  id: `metric-${overrides.date}`,
+  user_id: 'test-user-id',
+  date: overrides.date,
+  engagement: overrides.engagement,
+  reach: null,
+  created_at: null,
+});
+
 describe('GET /api/analytics/summary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -118,8 +152,20 @@ describe('GET /api/analytics/summary', () => {
 
   it('calculates totalEngagement correctly', async () => {
     const mockPosts = [
-      { likes: 10, comments: 5, shares: 2, engagement_rate: '3.5' },
-      { likes: 20, comments: 10, shares: 5, engagement_rate: '4.0' },
+      createMockPost({
+        id: 'post-1',
+        likes: 10,
+        comments: 5,
+        shares: 2,
+        engagement_rate: 3.5,
+      }),
+      createMockPost({
+        id: 'post-2',
+        likes: 20,
+        comments: 10,
+        shares: 5,
+        engagement_rate: 4.0,
+      }),
     ];
 
     mockGetUser.mockResolvedValue({
@@ -144,8 +190,20 @@ describe('GET /api/analytics/summary', () => {
 
   it('calculates avgEngagementRate correctly', async () => {
     const mockPosts = [
-      { likes: 10, comments: 5, shares: 2, engagement_rate: '3.5' },
-      { likes: 20, comments: 10, shares: 5, engagement_rate: '4.5' },
+      createMockPost({
+        id: 'post-1',
+        likes: 10,
+        comments: 5,
+        shares: 2,
+        engagement_rate: 3.5,
+      }),
+      createMockPost({
+        id: 'post-2',
+        likes: 20,
+        comments: 10,
+        shares: 5,
+        engagement_rate: 4.5,
+      }),
     ];
 
     mockGetUser.mockResolvedValue({
@@ -170,9 +228,27 @@ describe('GET /api/analytics/summary', () => {
 
   it('returns topPost as the post with highest total engagement', async () => {
     const mockPosts = [
-      { id: 1, likes: 10, comments: 5, shares: 2, engagement_rate: '3.5' }, // total: 17
-      { id: 2, likes: 50, comments: 20, shares: 10, engagement_rate: '5.0' }, // total: 80
-      { id: 3, likes: 30, comments: 15, shares: 5, engagement_rate: '4.0' }, // total: 50
+      createMockPost({
+        id: 'post-1',
+        likes: 10,
+        comments: 5,
+        shares: 2,
+        engagement_rate: 3.5,
+      }), // total: 17
+      createMockPost({
+        id: 'post-2',
+        likes: 50,
+        comments: 20,
+        shares: 10,
+        engagement_rate: 5.0,
+      }), // total: 80
+      createMockPost({
+        id: 'post-3',
+        likes: 30,
+        comments: 15,
+        shares: 5,
+        engagement_rate: 4.0,
+      }), // total: 50
     ];
 
     mockGetUser.mockResolvedValue({
@@ -190,20 +266,24 @@ describe('GET /api/analytics/summary', () => {
         const json = await response.json();
 
         expect(response.status).toBe(200);
-        expect(json.topPost).toEqual(mockPosts[1]); // Post with id: 2 has highest engagement
+        expect(json.topPost.id).toBe('post-2'); // Post with id: post-2 has highest engagement
       },
     });
   });
 
   it('calculates positive trend correctly', async () => {
-    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) => ({
-      date: `2026-01-${String(i + 1).padStart(2, '0')}`,
-      engagement: 100,
-    }));
-    const previousPeriodMetrics = Array.from({ length: 30 }, (_, i) => ({
-      date: `2025-12-${String(i + 1).padStart(2, '0')}`,
-      engagement: 50,
-    }));
+    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) =>
+      createMockMetric({
+        date: `2026-01-${String(i + 1).padStart(2, '0')}`,
+        engagement: 100,
+      }),
+    );
+    const previousPeriodMetrics = Array.from({ length: 30 }, (_, i) =>
+      createMockMetric({
+        date: `2025-12-${String(i + 1).padStart(2, '0')}`,
+        engagement: 50,
+      }),
+    );
 
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'test-user-id' } },
@@ -232,14 +312,18 @@ describe('GET /api/analytics/summary', () => {
   });
 
   it('calculates negative trend correctly', async () => {
-    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) => ({
-      date: `2026-01-${String(i + 1).padStart(2, '0')}`,
-      engagement: 50,
-    }));
-    const previousPeriodMetrics = Array.from({ length: 30 }, (_, i) => ({
-      date: `2025-12-${String(i + 1).padStart(2, '0')}`,
-      engagement: 100,
-    }));
+    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) =>
+      createMockMetric({
+        date: `2026-01-${String(i + 1).padStart(2, '0')}`,
+        engagement: 50,
+      }),
+    );
+    const previousPeriodMetrics = Array.from({ length: 30 }, (_, i) =>
+      createMockMetric({
+        date: `2025-12-${String(i + 1).padStart(2, '0')}`,
+        engagement: 100,
+      }),
+    );
 
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'test-user-id' } },
@@ -268,10 +352,12 @@ describe('GET /api/analytics/summary', () => {
   });
 
   it('handles trend calculation when previous period is zero', async () => {
-    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) => ({
-      date: `2026-01-${String(i + 1).padStart(2, '0')}`,
-      engagement: 100,
-    }));
+    const currentPeriodMetrics = Array.from({ length: 30 }, (_, i) =>
+      createMockMetric({
+        date: `2026-01-${String(i + 1).padStart(2, '0')}`,
+        engagement: 100,
+      }),
+    );
 
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'test-user-id' } },
@@ -341,6 +427,52 @@ describe('GET /api/analytics/summary', () => {
 
         expect(response.status).toBe(500);
         expect(json.error).toBe('Internal Server Error');
+      },
+    });
+  });
+
+  it('returns 500 on posts schema validation error', async () => {
+    const invalidPosts = [{ invalid: 'data' }];
+
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+    mockPostsResult.mockResolvedValue({ data: invalidPosts, error: null });
+    mockMetricsResult.mockResolvedValue({ data: [], error: null });
+
+    await testApiHandler({
+      appHandler,
+      url: '/api/analytics/summary',
+      test: async ({ fetch }) => {
+        const response = await fetch({ method: 'GET' });
+        const json = await response.json();
+
+        expect(response.status).toBe(500);
+        expect(json.error).toBe('Data validation failed');
+      },
+    });
+  });
+
+  it('returns 500 on metrics schema validation error', async () => {
+    const invalidMetrics = [{ invalid: 'data' }];
+
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+    mockPostsResult.mockResolvedValue({ data: [], error: null });
+    mockMetricsResult.mockResolvedValue({ data: invalidMetrics, error: null });
+
+    await testApiHandler({
+      appHandler,
+      url: '/api/analytics/summary',
+      test: async ({ fetch }) => {
+        const response = await fetch({ method: 'GET' });
+        const json = await response.json();
+
+        expect(response.status).toBe(500);
+        expect(json.error).toBe('Data validation failed');
       },
     });
   });

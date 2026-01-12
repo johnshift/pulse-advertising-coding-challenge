@@ -1,8 +1,9 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { Platform, SortDirection, PostSortField } from '@/lib/types';
+import { postsResponseSchema } from '@/lib/schemas';
 import { createClient } from '@/lib/supabase/client';
 import { queryKeys } from '@/lib/query-keys';
+import type { Platform, SortDirection, PostSortField } from '@/lib/types';
 
 type UsePostsParams = {
   page?: number;
@@ -15,6 +16,39 @@ type UsePostsParams = {
 const DEFAULT_SORT_FIELD = 'posted_at' as const;
 const DEFAULT_SORT_DIRECTION = 'desc' as const;
 
+const fetchPosts = async (
+  page: number,
+  pageSize: number,
+  sortField: NonNullable<PostSortField>,
+  sortDirection: NonNullable<SortDirection>,
+  platform: Platform | null,
+) => {
+  const supabase = createClient();
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let queryBuilder = supabase.from('posts').select('*', { count: 'exact' });
+
+  if (platform) {
+    queryBuilder = queryBuilder.eq('platform', platform);
+  }
+
+  queryBuilder = queryBuilder
+    .order(sortField, { ascending: sortDirection === 'asc' })
+    .range(from, to);
+
+  const { data, error, count } = await queryBuilder;
+
+  if (error) throw error;
+
+  const validatedPosts = postsResponseSchema.parse(data);
+
+  return {
+    posts: validatedPosts,
+    totalCount: count ?? 0,
+  };
+};
+
 export const usePosts = ({
   page = 1,
   pageSize = 10,
@@ -22,8 +56,6 @@ export const usePosts = ({
   sortDirection,
   platform = null,
 }: UsePostsParams = {}) => {
-  const supabase = createClient();
-
   const effectiveSortField = sortField ?? DEFAULT_SORT_FIELD;
   const effectiveSortDirection = sortDirection ?? DEFAULT_SORT_DIRECTION;
 
@@ -35,31 +67,14 @@ export const usePosts = ({
       sortDirection: effectiveSortDirection,
       platform,
     }),
-    queryFn: async () => {
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      let queryBuilder = supabase.from('posts').select('*', { count: 'exact' });
-
-      if (platform) {
-        queryBuilder = queryBuilder.eq('platform', platform);
-      }
-
-      queryBuilder = queryBuilder
-        .order(effectiveSortField, {
-          ascending: effectiveSortDirection === 'asc',
-        })
-        .range(from, to);
-
-      const { data, error, count } = await queryBuilder;
-
-      if (error) throw error;
-
-      return {
-        posts: data,
-        totalCount: count ?? 0,
-      };
-    },
+    queryFn: () =>
+      fetchPosts(
+        page,
+        pageSize,
+        effectiveSortField,
+        effectiveSortDirection,
+        platform,
+      ),
     placeholderData: keepPreviousData,
   });
 

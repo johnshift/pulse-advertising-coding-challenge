@@ -11,6 +11,7 @@ import {
   Play,
 } from 'lucide-react';
 
+import type { Post } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
 import {
   Carousel,
@@ -27,8 +28,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ImageLoader } from '@/components/ui/image-loader';
-
-import { Post } from '@/lib/types';
 
 type PostDetailDialogProps = {
   post: Post | null;

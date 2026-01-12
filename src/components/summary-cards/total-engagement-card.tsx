@@ -2,10 +2,9 @@
 
 import { Activity, TrendingDown, TrendingUp } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-
-import { Trend } from './types';
+import type { Trend } from '@/lib/schemas';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const formatNumber = (num: number): string => {
   if (num >= 1_000_000) {

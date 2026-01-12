@@ -1,10 +1,4 @@
-export type DailyMetric = {
-  date: string;
-  engagement: number;
-  reach: number;
-};
-
-export type TimeRange = 'week' | 'month' | 'quarter' | 'year' | 'all';
+export type { DailyMetric, TimeRange } from '@/lib/types';
 
 export type MetricKey = 'engagement' | 'reach';
 

@@ -1,9 +1,11 @@
+import { dailyMetricsResponseSchema, timeRangeSchema } from '@/lib/schemas';
+import type { TimeRange } from '@/lib/types';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-const RANGE_DAYS: Record<string, number | null> = {
+const RANGE_DAYS: Record<TimeRange, number | null> = {
   week: 7,
   month: 30,
   quarter: 90,
@@ -23,8 +25,24 @@ export const GET = async (request: NextRequest) => {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const range = request.nextUrl.searchParams.get('range') ?? 'month';
-  const days = range in RANGE_DAYS ? RANGE_DAYS[range] : RANGE_DAYS.month;
+  const rangeParam = request.nextUrl.searchParams.get('range') ?? 'month';
+  const parseResult = timeRangeSchema.safeParse(rangeParam);
+
+  if (!parseResult.success) {
+    return NextResponse.json(
+      {
+        error: 'Invalid request parameters',
+        details: parseResult.error.issues.map((issue) => ({
+          path: issue.path,
+          message: issue.message,
+        })),
+      },
+      { status: 400 },
+    );
+  }
+
+  const range = parseResult.data;
+  const days = RANGE_DAYS[range];
 
   let query = supabase
     .from('daily_metrics')
@@ -44,5 +62,15 @@ export const GET = async (request: NextRequest) => {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  const validationResult = dailyMetricsResponseSchema.safeParse(data);
+
+  if (!validationResult.success) {
+    console.error('Schema validation error:', validationResult.error);
+    return NextResponse.json(
+      { error: 'Data validation failed' },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json(validationResult.data);
 };

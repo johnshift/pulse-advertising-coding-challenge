@@ -3,11 +3,11 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 
+import type { Post } from '@/lib/schemas';
+import type { SortDirection, PostSortField } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { InstagramSVG } from '@/components/ui/svgs/instagram-svg';
 import { TiktokSVG } from '@/components/ui/svgs/tiktok-svg';
-
-import { Post, SortDirection, PostSortField } from '@/lib/types';
 import { ImageLoader } from '@/components/ui/image-loader';
 
 type SortableHeaderProps = {

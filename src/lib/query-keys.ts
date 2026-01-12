@@ -3,8 +3,12 @@ import {
   mergeQueryKeys,
 } from '@lukemorales/query-key-factory';
 
-import type { Platform, PostSortField, SortDirection } from '@/lib/types';
-import type { TimeRange } from '@/components/daily-metrics/types';
+import type {
+  Platform,
+  PostSortField,
+  SortDirection,
+  TimeRange,
+} from '@/lib/types';
 
 export const posts = createQueryKeys('posts', {
   list: (filters: {

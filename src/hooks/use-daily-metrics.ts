@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import type { TimeRange } from '@/components/daily-metrics/types';
+import type { TimeRange } from '@/lib/types';
 import { queryKeys } from '@/lib/query-keys';
 
 export const useDailyMetrics = (timeRange: TimeRange) => {

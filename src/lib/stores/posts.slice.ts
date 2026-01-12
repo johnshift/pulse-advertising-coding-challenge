@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 
-import { Platform, SortDirection, PostSortField, Post } from '@/lib/types';
+import type { Post } from '@/lib/schemas';
+import type { Platform, SortDirection, PostSortField } from '@/lib/types';
 
 export interface PostsSlice {
   page: number;
