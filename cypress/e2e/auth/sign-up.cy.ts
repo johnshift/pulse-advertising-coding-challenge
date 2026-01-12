@@ -38,6 +38,13 @@ describe('Sign Up Page', () => {
   });
 
   it('should show loading state when submitting', () => {
+    cy.intercept('POST', '**/signup**', (req) => {
+      req.reply({
+        delay: 1000,
+        statusCode: 400,
+        body: { error: 'signup_disabled' },
+      });
+    }).as('signUpRequest');
     cy.get('input#email').type('test@example.com');
     cy.get('input#password').type('password123');
     cy.get('input#repeat-password').type('password123');
