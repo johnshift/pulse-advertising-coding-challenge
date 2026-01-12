@@ -40,12 +40,24 @@ export const updateSession = async (request: NextRequest) => {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
+  const isAuthPage = request.nextUrl.pathname.startsWith('/auth');
+  const isProtectedPage =
     request.nextUrl.pathname !== '/' &&
-    !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    !isAuthPage;
+
+  // Redirect authenticated users away from auth pages (except update-password)
+  if (
+    user &&
+    isAuthPage &&
+    !request.nextUrl.pathname.includes('/update-password')
   ) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
+  }
+
+  if (!user && isProtectedPage) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = '/auth/login';
