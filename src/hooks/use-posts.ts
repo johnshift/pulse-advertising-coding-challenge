@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { Platform, SortDirection, PostSortField } from '@/lib/types';
 import { createClient } from '@/lib/supabase/client';
+import { queryKeys } from '@/lib/query-keys';
 
 type UsePostsParams = {
   page?: number;
@@ -27,16 +28,13 @@ export const usePosts = ({
   const effectiveSortDirection = sortDirection ?? DEFAULT_SORT_DIRECTION;
 
   const query = useQuery({
-    queryKey: [
-      'posts',
-      {
-        page,
-        pageSize,
-        sortField: effectiveSortField,
-        sortDirection: effectiveSortDirection,
-        platform,
-      },
-    ],
+    ...queryKeys.posts.list({
+      page,
+      pageSize,
+      sortField: effectiveSortField,
+      sortDirection: effectiveSortDirection,
+      platform,
+    }),
     queryFn: async () => {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
