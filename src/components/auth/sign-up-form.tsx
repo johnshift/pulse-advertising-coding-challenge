@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import * as motion from 'motion/react-client';
 
 import { cn } from '@/lib/utils';
@@ -29,6 +29,7 @@ export const SignUpForm = ({ className }: SignUpFormProps) => {
   const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -52,10 +53,11 @@ export const SignUpForm = ({ className }: SignUpFormProps) => {
         },
       });
       if (error) throw error;
-      router.push('/auth/sign-up-success');
+      startTransition(() => {
+        router.push('/auth/sign-up-success');
+      });
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -111,8 +113,12 @@ export const SignUpForm = ({ className }: SignUpFormProps) => {
                 />
               </div>
               {error && <p className='text-sm text-red-500'>{error}</p>}
-              <Button type='submit' className='w-full' disabled={isLoading}>
-                {isLoading ? 'Creating an account...' : 'Sign up'}
+              <Button
+                type='submit'
+                className='w-full'
+                disabled={isLoading || isPending}
+              >
+                {isLoading || isPending ? 'Creating an account...' : 'Sign up'}
               </Button>
             </div>
             <div className='mt-4 text-center text-sm'>
