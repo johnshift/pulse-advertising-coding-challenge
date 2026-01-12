@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
 
 import { cn } from '@/lib/utils';
 
@@ -35,12 +36,18 @@ export const TableHeader = ({
   );
 };
 
+type TableBodyProps = React.ComponentProps<'tbody'> & {
+  asChild?: boolean;
+};
+
 export const TableBody = ({
   className,
+  asChild = false,
   ...props
-}: React.ComponentProps<'tbody'>) => {
+}: TableBodyProps) => {
+  const Comp = asChild ? Slot : 'tbody';
   return (
-    <tbody
+    <Comp
       data-slot='table-body'
       className={cn('[&_tr:last-child]:border-0', className)}
       {...props}
@@ -64,12 +71,18 @@ export const TableFooter = ({
   );
 };
 
+type TableRowProps = React.ComponentProps<'tr'> & {
+  asChild?: boolean;
+};
+
 export const TableRow = ({
   className,
+  asChild = false,
   ...props
-}: React.ComponentProps<'tr'>) => {
+}: TableRowProps) => {
+  const Comp = asChild ? Slot : 'tr';
   return (
-    <tr
+    <Comp
       data-slot='table-row'
       className={cn(
         'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',

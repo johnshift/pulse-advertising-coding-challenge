@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import * as motion from 'motion/react-client';
 
 import { useDailyMetrics } from '@/hooks/use-daily-metrics';
 import { cn } from '@/lib/utils';
+import { fadeInVariant } from '@/lib/motion';
 
 import { DailyMetricsChart } from './daily-metrics-chart';
 import { DailyMetricsControls } from './daily-metrics-controls';
@@ -81,12 +83,19 @@ export const DailyMetrics = () => {
         ) : !hasData ? (
           <DailyMetricsEmpty />
         ) : (
-          <DailyMetricsChart
-            data={data as DailyMetric[]}
-            visibleMetrics={visibleMetrics}
-            chartType={chartType}
-            timeRange={timeRange}
-          />
+          <motion.div
+            variants={fadeInVariant}
+            initial='hidden'
+            animate='visible'
+            key={`${chartType}-${timeRange}`}
+          >
+            <DailyMetricsChart
+              data={data as DailyMetric[]}
+              visibleMetrics={visibleMetrics}
+              chartType={chartType}
+              timeRange={timeRange}
+            />
+          </motion.div>
         )}
       </div>
     </div>

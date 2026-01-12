@@ -5,6 +5,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import * as motion from 'motion/react-client';
 
 import {
   Table,
@@ -17,6 +18,7 @@ import {
 import { usePosts } from '@/hooks/use-posts';
 import { useDashboardStore } from '@/lib/stores/dashboard.store';
 import { cn } from '@/lib/utils';
+import { fadeInVariant, staggerContainerFast } from '@/lib/motion';
 
 import { createColumns } from './posts-table-columns';
 import { PostDetailDialog } from './post-detail-dialog';
@@ -129,37 +131,49 @@ export const PostsTable = () => {
             />
           ) : (
             <TableBody
+              asChild
               className={cn(
                 'transition-opacity',
                 isFetching && 'pointer-events-none opacity-50',
               )}
             >
-              {table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={() => openPostDialog(row.original)}
-                  className='h-[53px] cursor-pointer'
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      openPostDialog(row.original);
-                    }
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{ width: cell.column.getSize() }}
-                      className={cn(cell.column.id !== 'post' && 'text-center')}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              <motion.tbody
+                variants={staggerContainerFast}
+                initial='hidden'
+                animate='visible'
+              >
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    asChild
+                    onClick={() => openPostDialog(row.original)}
+                    className='h-[53px] cursor-pointer'
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        openPostDialog(row.original);
+                      }
+                    }}
+                  >
+                    <motion.tr variants={fadeInVariant}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={{ width: cell.column.getSize() }}
+                          className={cn(
+                            cell.column.id !== 'post' && 'text-center',
+                          )}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </motion.tr>
+                  </TableRow>
+                ))}
+              </motion.tbody>
             </TableBody>
           )}
         </Table>

@@ -1,11 +1,13 @@
 'use client';
 
 import { ReactNode } from 'react';
+import * as motion from 'motion/react-client';
 
 import { PostDetailDialog } from '@/components/posts-table/post-detail-dialog';
 import { useAnalyticsSummary } from '@/hooks/use-analytics-summary';
 import type { AnalyticsSummary } from '@/lib/types';
 import { useDashboardStore } from '@/lib/stores/dashboard.store';
+import { fadeUpVariant, staggerContainer } from '@/lib/motion';
 
 import { AvgEngagementCard } from './avg-engagement-card';
 import {
@@ -61,24 +63,35 @@ export const SummaryCards = () => {
 
   return (
     <SummaryCardsWrapper>
-      <div className='grid gap-5 md:grid-cols-2 lg:grid-cols-3'>
-        <TotalEngagementCard
-          totalEngagement={summary.totalEngagement}
-          trend={summary.trend}
-        />
-        <AvgEngagementCard
-          avgEngagementRate={summary.avgEngagementRate}
-          trend={summary.trend}
-        />
-        {summary.topPost ? (
-          <TopPostCard
-            post={summary.topPost}
-            onClick={() => openPostDialog(summary.topPost!)}
+      <motion.div
+        className='grid gap-5 md:grid-cols-2 lg:grid-cols-3'
+        variants={staggerContainer}
+        initial='hidden'
+        animate='visible'
+      >
+        <motion.div variants={fadeUpVariant}>
+          <TotalEngagementCard
+            totalEngagement={summary.totalEngagement}
+            trend={summary.trend}
           />
-        ) : (
-          <TopPostCardEmpty />
-        )}
-      </div>
+        </motion.div>
+        <motion.div variants={fadeUpVariant}>
+          <AvgEngagementCard
+            avgEngagementRate={summary.avgEngagementRate}
+            trend={summary.trend}
+          />
+        </motion.div>
+        <motion.div variants={fadeUpVariant}>
+          {summary.topPost ? (
+            <TopPostCard
+              post={summary.topPost}
+              onClick={() => openPostDialog(summary.topPost!)}
+            />
+          ) : (
+            <TopPostCardEmpty />
+          )}
+        </motion.div>
+      </motion.div>
       <PostDetailDialog
         post={selectedPost}
         open={isPostDialogOpen}
