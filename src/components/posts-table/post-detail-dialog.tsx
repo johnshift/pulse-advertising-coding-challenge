@@ -10,6 +10,7 @@ import {
   Users,
   Play,
 } from 'lucide-react';
+import * as motion from 'motion/react-client';
 
 import type { Post } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ImageLoader } from '@/components/ui/image-loader';
+import { scaleInVariant, staggerContainerFast } from '@/lib/motion';
 
 type PostDetailDialogProps = {
   post: Post | null;
@@ -170,25 +172,41 @@ export const PostDetailDialog = ({
         </DialogHeader>
 
         <div className='space-y-6'>
-          <div className='space-y-3'>
+          <motion.div
+            className='space-y-3'
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <PostMediaContent post={post} />
             <p className='text-sm text-muted-foreground'>
               {post.caption || 'No caption'}
             </p>
-          </div>
+          </motion.div>
 
-          <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
+          <motion.div
+            className='grid grid-cols-2 gap-3 sm:grid-cols-3'
+            variants={staggerContainerFast}
+            initial='hidden'
+            animate='visible'
+          >
             {statItems.map(({ icon: Icon, label, key }) => (
-              <StatItem
-                key={key}
-                icon={<Icon className='size-5' />}
-                label={label}
-                value={post[key]}
-              />
+              <motion.div key={key} variants={scaleInVariant}>
+                <StatItem
+                  icon={<Icon className='size-5' />}
+                  label={label}
+                  value={post[key]}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className='flex items-center justify-between border-t pt-4'>
+          <motion.div
+            className='flex items-center justify-between border-t pt-4'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
             <div className='text-sm'>
               <span className='text-muted-foreground'>Engagement Rate: </span>
               <span className='font-semibold'>
@@ -205,7 +223,7 @@ export const PostDetailDialog = ({
                 View on Platform
               </a>
             </Button>
-          </div>
+          </motion.div>
         </div>
       </DialogContent>
     </Dialog>
