@@ -53,11 +53,13 @@ describe('Posts Table', () => {
   });
 
   it('should open post detail dialog when clicking a row', () => {
+    cy.get('table tbody .animate-pulse').should('not.exist');
     cy.get('table tbody tr').first().click();
     cy.get('[role="dialog"]').should('be.visible');
   });
 
   it('should close post detail dialog', () => {
+    cy.get('table tbody .animate-pulse').should('not.exist');
     cy.get('table tbody tr').first().click();
     cy.get('[role="dialog"]').should('be.visible');
     cy.get('[role="dialog"]')
