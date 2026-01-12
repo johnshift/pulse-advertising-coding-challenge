@@ -4,7 +4,7 @@ A Social Media Analytics Dashboard built with Next.js, Supabase, and TanStack Qu
 
 ## Live Demo
 
-🔗 [View Live Demo](pulse-advertising-coding-challenge.vercel.app)
+🔗 [View Live Demo](https://pulse-advertising-coding-challenge.vercel.app)
 
 ## Tech Stack
 
@@ -109,11 +109,11 @@ I chose to aggregate engagement metrics in the **Next.js API Route** (`/api/anal
 
 ### Trade-offs
 
-| Consideration            | API Route (chosen)                                         | Database                                            | Client-side                                  |
-| ------------------------ | ---------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------- |
-| **Performance at scale** | Fetches all rows to compute (inefficient at 10,000+ posts) | Best: aggregation is optimized at the data layer   | Worst: transfers all data over the network  |
-| **Caching granularity**  | TanStack Query caches the whole summary                    | Can use materialized views for pre-computed results | Can reuse already-fetched post data          |
-| **Complexity**           | Moderate: dedicated route with validation                 | Higher: requires DB expertise and migrations       | Lower: but scatters logic across components |
+| Consideration            | API Route (chosen)                                         | Database                                            | Client-side                                 |
+| ------------------------ | ---------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
+| **Performance at scale** | Fetches all rows to compute (inefficient at 10,000+ posts) | Best: aggregation is optimized at the data layer    | Worst: transfers all data over the network  |
+| **Caching granularity**  | TanStack Query caches the whole summary                    | Can use materialized views for pre-computed results | Can reuse already-fetched post data         |
+| **Complexity**           | Moderate: dedicated route with validation                  | Higher: requires DB expertise and migrations        | Lower: but scatters logic across components |
 
 ### What I'd Change at Scale
 
@@ -147,9 +147,9 @@ For this challenge, the dataset is small (~20 posts, 60 days of metrics), so the
 
 ### Persistence, Shareability & Cache Invalidation
 
-| Consideration          | Current Approach                                                        |
-| ---------------------- | ----------------------------------------------------------------------- |
-| **Persistence**        | All state is in-memory; refreshing the page resets to defaults          |
+| Consideration          | Current Approach                                                       |
+| ---------------------- | ---------------------------------------------------------------------- |
+| **Persistence**        | All state is in-memory; refreshing the page resets to defaults         |
 | **Shareability**       | Not implemented: assumed dashboard page is not shareable               |
 | **Cache invalidation** | Not needed: dashboard is read-only with no mutations to trigger stales |
 
@@ -232,7 +232,7 @@ I chose to compare the **last 30 days vs. the prior 30 days** using the `daily_m
 | ----------------------- | -------------------------------------------------------- |
 | **60+ days of data**    | Full comparison: `(current - previous) / previous × 100` |
 | **30-59 days of data**  | Partial comparison using available prior data            |
-| **< 30 days of data**   | Returns `0%` neutral (avoids misleading "100% growth")     |
+| **< 30 days of data**   | Returns `0%` neutral (avoids misleading "100% growth")   |
 | **Previous period = 0** | If current > 0, shows `+100%`; otherwise `0%`            |
 
 New users see a neutral `0%` trend rather than a false positive. This aligns with the empty state philosophy: no data is not an error, and the UI should not mislead.
