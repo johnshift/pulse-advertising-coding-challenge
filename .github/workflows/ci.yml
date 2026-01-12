@@ -92,6 +92,8 @@ jobs:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'preview')
     needs: [lint-build-test, supabase-migration]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     outputs:
       preview-url: ${{ steps.deploy.outputs.preview_url }}
     steps:
