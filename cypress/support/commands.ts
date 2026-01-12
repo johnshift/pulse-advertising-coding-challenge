@@ -1,6 +1,6 @@
 export const TEST_USERS = {
-  demo1: { email: 'demo1@example.com', password: 'asdf1234' },
-  demo2: { email: 'demo2@example.com', password: 'asdf1234' },
+  demo1: { email: 'demo1@example.com', password: 'password123' },
+  demo2: { email: 'demo2@example.com', password: 'password123' },
 } as const;
 
 declare global {

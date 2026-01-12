@@ -9,5 +9,9 @@ export default defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
+    env: {
+      VERCEL_AUTOMATION_BYPASS_SECRET:
+        process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+    },
   },
 });
