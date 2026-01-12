@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ImageLoader } from '@/components/ui/image-loader';
 import { InstagramSVG } from '@/components/ui/svgs/instagram-svg';
 import { TiktokSVG } from '@/components/ui/svgs/tiktok-svg';
-import { Post } from '@/lib/types';
+import type { Post } from '@/lib/schemas';
 import { cn } from '@/lib/utils';
 
 const formatCompactNumber = (num: number): string => {

@@ -1,9 +1,8 @@
-import { Tables } from '@/lib/database.types';
+import type { Post, Trend } from './schemas';
 
 export type SortDirection = 'asc' | 'desc' | null;
 export type Platform = 'instagram' | 'tiktok';
 
-export type Post = Tables<'posts'>;
 export type PostSortField =
   | 'likes'
   | 'comments'
@@ -11,3 +10,17 @@ export type PostSortField =
   | 'engagement_rate'
   | 'posted_at'
   | null;
+
+export type AnalyticsSummary = {
+  totalEngagement: number;
+  avgEngagementRate: number;
+  topPost: Post | null;
+  trend: Trend;
+};
+
+export type {
+  DailyMetric,
+  DailyMetricsResponse,
+  TimeRange,
+  TrendDirection,
+} from './schemas';

@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 
 import { PostDetailDialog } from '@/components/posts-table/post-detail-dialog';
 import { useAnalyticsSummary } from '@/hooks/use-analytics-summary';
+import type { AnalyticsSummary } from '@/lib/types';
 import { useDashboardStore } from '@/lib/stores/dashboard.store';
 
 import { AvgEngagementCard } from './avg-engagement-card';
@@ -14,7 +15,6 @@ import {
 } from './summary-cards-states';
 import { TopPostCard, TopPostCardEmpty } from './top-post-card';
 import { TotalEngagementCard } from './total-engagement-card';
-import { AnalyticsSummary } from './types';
 
 const SummaryCardsWrapper = ({ children }: { children: ReactNode }) => (
   <div className='w-full space-y-6'>
