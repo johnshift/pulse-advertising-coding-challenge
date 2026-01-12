@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import * as motion from 'motion/react-client';
 
 import { cn } from '@/lib/utils';
@@ -28,6 +28,7 @@ export const LoginForm = ({ className }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -42,11 +43,12 @@ export const LoginForm = ({ className }: LoginFormProps) => {
         password,
       });
       if (error) throw error;
-      router.refresh();
-      router.push('/dashboard');
+      startTransition(() => {
+        router.refresh();
+        router.push('/dashboard');
+      });
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -98,8 +100,12 @@ export const LoginForm = ({ className }: LoginFormProps) => {
                 />
               </div>
               {error && <p className='text-sm text-red-500'>{error}</p>}
-              <Button type='submit' className='w-full' disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+              <Button
+                type='submit'
+                className='w-full'
+                disabled={isLoading || isPending}
+              >
+                {isLoading || isPending ? 'Logging in...' : 'Login'}
               </Button>
             </div>
             <div className='mt-4 text-center text-sm'>

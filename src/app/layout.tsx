@@ -16,9 +16,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OTA Frontend Engineer - Coding Challenge',
-  description:
-    'Coding challenge for frontend engineers who are comfortable working with Supabase, understand security fundamentals, and can make thoughtful decisions about state management and data flow.',
+  title: 'Pulse Advertising - Coding Challenge',
+  description: 'Coding challenge for frontend engineers.',
+  icons: {
+    icon: [
+      {
+        url: 'https://www.pulse-advertising.com/wp-content/uploads/2020/03/cropped-PA-logo-honeycomb-black-01-32x32.png',
+        sizes: '32x32',
+      },
+      {
+        url: 'https://www.pulse-advertising.com/wp-content/uploads/2020/03/cropped-PA-logo-honeycomb-black-01-192x192.png',
+        sizes: '192x192',
+      },
+    ],
+    apple: [
+      {
+        url: 'https://www.pulse-advertising.com/wp-content/uploads/2020/03/cropped-PA-logo-honeycomb-black-01-180x180.png',
+        sizes: '180x180',
+      },
+    ],
+  },
 };
 
 const RootLayout = ({
