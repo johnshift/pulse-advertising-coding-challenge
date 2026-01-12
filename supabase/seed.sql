@@ -144,14 +144,26 @@ DECLARE
   c_reach_min CONSTANT INT := 50;
   c_reach_max CONSTANT INT := 4000;
 
+  -- Fixed UUIDs for demo users (idempotent)
+  c_demo_uuids CONSTANT UUID[] := ARRAY[
+    '11111111-1111-1111-1111-111111111111'::UUID,
+    '22222222-2222-2222-2222-222222222222'::UUID
+  ];
+
   -- Loop variables
   i INT;
   current_id UUID;
   current_email TEXT;
   _now TIMESTAMP;
 BEGIN
+  -- Clean up existing demo data for idempotency
+  DELETE FROM daily_metrics WHERE user_id = ANY(c_demo_uuids);
+  DELETE FROM posts WHERE user_id = ANY(c_demo_uuids);
+  DELETE FROM auth.identities WHERE user_id = ANY(c_demo_uuids);
+  DELETE FROM auth.users WHERE id = ANY(c_demo_uuids);
+
   FOR i IN 1..c_num_users LOOP
-    current_id := gen_random_uuid();
+    current_id := c_demo_uuids[i];
     current_email := CONCAT('demo', i::TEXT, '@example.com');
     _now := current_timestamp;
 
